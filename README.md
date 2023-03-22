@@ -1,1 +1,1 @@
-# chat_application
+# animated_text_kit

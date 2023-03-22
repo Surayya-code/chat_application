@@ -1,6 +1,6 @@
 # flutter_chat_application
 
-A new Flutter project.
+Use animated_text_kit package
 
 ## Getting Started
 

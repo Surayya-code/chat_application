@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -12,29 +13,45 @@ class ChatScreen extends StatefulWidget {
 }
 
 class ChatScreenState extends State<ChatScreen> {
+   //User? loggedInUser;
+   //CollectionReference
   final auth = FirebaseAuth.instance;
-  late User loggedInUser;
-  final User? user = FirebaseAuth.instance.currentUser;
-  //final uid = user.uid;
+  final  users = FirebaseFirestore.instance.collection('messages');
+   
+  late String messageText;
 
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    //users;
+    //getCurrentUser();
+    //addUser();
   }
 
-  Future<void> getCurrentUser() async {
-    try {
-      final  user =  auth.currentUser;
-      if (user != null) {
-        loggedInUser = user;
-        print(loggedInUser.email);
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+  // void getCurrentUser() async {
+  //   try {
+  //     final User? user =  auth.currentUser;
+  //     if (user != null) {
+  //       loggedInUser = user;
+  //       print(loggedInUser?.email);
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
+  
+//  Future<void> addUser() {
+//       // Call the user's CollectionReference to add a new user
+//       return users
+//           .add({
+//             'text': messageText, // John Doe
+//             'sender': loggedInUser.email, // Stokes and Sons
+            
+//           })
+//           .then((value) => print("User Added"))
+//           .catchError((error) => print("Failed to add user: $error"));
+//     }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +61,8 @@ class ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
-                //Implement logout functionality
+                auth.signOut();
+                Navigator.pop(context);
               }),
         ],
         title: const Text('⚡️Chat'),
@@ -61,17 +79,23 @@ class ChatScreenState extends State<ChatScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Expanded(
-                    child: TextField(
+                    child: TextFormField(
                       onChanged: (value) {
-                        //Do something with the user input.
+                        messageText=value;
                       },
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
                   TextButton(
                     onPressed: () {
-                      //Implement send functionality.
-                    },
+                      
+                      users.add({
+                        'text':messageText,
+                        'sender':auth.currentUser?.email,
+                      });
+                      print('send message to firebase');
+                      print(auth.currentUser?.email);
+                       },
                     child: const Text(
                       'Send',
                       style: kSendButtonTextStyle,

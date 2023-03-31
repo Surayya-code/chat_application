@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../constant.dart';
 
+
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
   const ChatScreen({super.key});
@@ -13,7 +14,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class ChatScreenState extends State<ChatScreen> {
+  final messageTextController=TextEditingController();
   final auth = FirebaseAuth.instance;
+  
   final CollectionReference<Map<String, dynamic>> users =
       FirebaseFirestore.instance.collection('messages');
   final Stream<QuerySnapshot> snapshot =
@@ -24,14 +27,8 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    
   }
-  // void getMessages() async {
-  //   final QuerySnapshot<Map<String, dynamic>> messages= await users.get();
-  //   for( QueryDocumentSnapshot<Map<String, dynamic>> message in messages.docs){
-  //    print(message.data);
-  //    print('data ');
-  //   }
-  //}
 
   void messagesStream() async {
     await for (var snapshot
@@ -66,7 +63,7 @@ class ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-           MessagesStream(),
+           const MessagesStream(),
            Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -74,6 +71,7 @@ class ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextFormField(
+                      controller: messageTextController,
                       onChanged: (value) {
                         messageText = value;
                       },
@@ -82,12 +80,16 @@ class ChatScreenState extends State<ChatScreen> {
                   ),
                   TextButton(
                     onPressed: () {
+                      messageTextController.clear();
                       users.add({
                         'text': messageText,
                         'sender': auth.currentUser?.email,
                       });
-                      print('send message to firebase');
-                      print(auth.currentUser?.email);
+
+
+
+                      // print('send message to firebase');
+                      // print(auth.currentUser?.email);
                     },
                     child: const Text(
                       'Send',
@@ -105,8 +107,8 @@ class ChatScreenState extends State<ChatScreen> {
 }
 
 class MessagesStream extends StatelessWidget {
-  const MessagesStream({super.key});
-
+  const MessagesStream({super.key,  this.loggedUser});
+  final User? loggedUser;
   @override
   Widget build(BuildContext context) {
     return  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -127,9 +129,15 @@ class MessagesStream extends StatelessWidget {
                     final messageText = message.data()['text'];
                     final messageSender = message.data()['sender'];
                     
+                    final currentUser=loggedUser?.email;
+                    // if(currentUser==messageSender){
+
+                    // }
+
                     final messageBubble = MessageBubble(
                     sender: messageSender,
-                    text: messageText);
+                    text: messageText,
+                    isMe: currentUser==messageSender,);
                         
                     messageBubbles.add(messageBubble);
                   }
@@ -148,25 +156,34 @@ class MessagesStream extends StatelessWidget {
   class MessageBubble extends StatelessWidget {
   const MessageBubble({super.key, 
    this.sender,
-   this.text});
+   this.text,
+   this.isMe});
   final String? sender;
   final String? text;
+  final bool? isMe;
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: isMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(sender.toString(),style: const TextStyle(color: Colors.black54,fontSize: 12,),),
           Material(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: isMe! ? const BorderRadius.only(
+              topLeft: Radius.circular(30.0),
+              bottomLeft: Radius.circular(30.0),
+               bottomRight: Radius.circular(30.0),):
+           const BorderRadius.only(
+              topRight: Radius.circular(30.0),
+              bottomLeft: Radius.circular(30.0),
+              bottomRight: Radius.circular(30.0),),
             elevation: 5.0,
-            color: Colors.lightBlueAccent,
+            color: isMe! ?Colors.lightBlueAccent: Colors.white,
             child:  Padding(
               padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
               child: Text( text.toString(),
-              style:const TextStyle(fontSize: 10,color: Colors.white),
+              style: TextStyle(fontSize: 10,color:isMe! ? Colors.white : Colors.black54),
               ),
             ),
           ),

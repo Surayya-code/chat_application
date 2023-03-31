@@ -82,8 +82,8 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                           if(newUser!=null){
                           Navigator.pushNamed(context, ChatScreen.id);
                           }
-                      print(email);
-                      print(password);
+                      // print(email);
+                      // print(password);
                     } 
                     catch (e) {
                       print(e);

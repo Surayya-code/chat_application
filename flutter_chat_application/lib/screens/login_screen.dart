@@ -86,8 +86,8 @@ class LoginScreenState extends State<LoginScreen> {
                       setState(() {
                       showSpinner = false;
                     });
-                      print(email);
-                      print(password);
+                      // print(email);
+                      // print(password);
                     } catch (e) {
                       print(e);
                     }
